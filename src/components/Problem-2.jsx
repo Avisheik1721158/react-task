@@ -1,79 +1,57 @@
 import React, { useState } from "react";
+import ModalA from "./ModalA";
+import { useNavigate } from "react-router-dom";
+import ModalB from "./ModalB";
 
-const Problem1 = () => {
-  const [show, setShow] = useState("all");
+const Problem2 = () => {
+  const [showModalA, setShowModalA] = useState(false);
+  const [showModalB, setShowModalB] = useState(false);
+  const navigate = useNavigate();
 
-  const handleClick = (val) => {
-    setShow(val);
+  const openModalA = () => {
+    navigate("/modalA");
+    setShowModalA(true);
+    setShowModalB(false);
+  };
+
+  const openModalB = () => {
+    navigate("/modalB");
+    setShowModalB(true);
+    setShowModalA(false);
   };
 
   return (
     <div className="container">
       <div className="row justify-content-center mt-5">
-        <h4 className="text-center text-uppercase mb-5">Problem-1</h4>
-        <div className="col-6 ">
-          <form className="row gy-2 gx-3 align-items-center mb-4">
-            <div className="col-auto">
-              <input type="text" className="form-control" placeholder="Name" />
-            </div>
-            <div className="col-auto">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Status"
-              />
-            </div>
-            <div className="col-auto">
-              <button type="submit" className="btn btn-primary">
-                Submit
-              </button>
-            </div>
-          </form>
+        <h4 className="text-center text-uppercase mb-5">Problem-2</h4>
+
+        <div className="d-flex justify-content-center gap-3">
+          <button
+            className="btn btn-lg btn-outline-primary"
+            type="button"
+            data-toggle="modal"
+            data-target="#exampleModalA"
+            onClick={openModalA}
+          >
+            All Contacts
+          </button>
+          <button
+            className="btn btn-lg btn-outline-warning"
+            type="button"
+            data-toggle="modal"
+            data-target="#exampleModalB"
+            onClick={openModalB}
+          >
+            US Contacts
+          </button>
         </div>
-        <div className="col-8">
-          <ul className="nav nav-pills mb-3" id="pills-tab" role="tablist">
-            <li className="nav-item">
-              <button
-                className={`nav-link ${show === "all" && "active"}`}
-                type="button"
-                onClick={() => handleClick("all")}
-              >
-                All
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className={`nav-link ${show === "active" && "active"}`}
-                type="button"
-                onClick={() => handleClick("active")}
-              >
-                Active
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className={`nav-link ${show === "completed" && "active"}`}
-                type="button"
-                onClick={() => handleClick("completed")}
-              >
-                Completed
-              </button>
-            </li>
-          </ul>
-          <div className="tab-content"></div>
-          <table className="table table-striped ">
-            <thead>
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+
+        {/* Modal A */}
+        {showModalA && <ModalA />}
+        {showModalB && <ModalB />}
       </div>
     </div>
   );
 };
 
-export default Problem1;
+export default Problem2;
