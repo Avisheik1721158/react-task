@@ -2,7 +2,47 @@ import React from "react";
 
 export default function ModalA() {
   const [quote, setQuote] = useState({ results: [] });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+  const [isLoading, setIsLoading] = useState(false);
   const [usContacts, setUsContacts] = useState([]);
+  const [showModalC, setShowModalC] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [onlyEven, setOnlyEven] = useState(false);
+  const [searchInput, setSearchInput] = useState(""); // Step 1
+  const [allContactsClicked, setAllContactsClicked] = useState(false);
+  const [currentContext, setCurrentContext] = useState("allContacts");
+
+  const handleSearchChange = (event) => {
+    setSearchInput(event.target.value);
+  };
+
+  const handleSearchKeyPress = async (event) => {
+    if (event.key === "Enter") {
+      await filterContacts(); // Step 4
+    }
+  };
+  const filterContacts = async () => {
+    try {
+      const res = await axios.get(
+        `https://contact.mediusware.com/api/contacts/?page=${currentPage}`
+      );
+      const filteredContacts = res.data.results.filter((result) =>
+        result.phone.includes(searchInput)
+      );
+
+      if (currentContext === "allContacts") {
+        setQuote({ results: filteredContacts });
+        setUsContacts([]);
+      } else if (currentContext === "usContacts") {
+        setUsContacts(filteredContacts);
+        setQuote({ results: [] });
+      }
+      // Step 3
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+    }
+  };
 
   const allContactsDetails = async () => {
     try {
