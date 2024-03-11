@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-export default function ModalA() {
+const ModalA = () => {
   const [quote, setQuote] = useState({ results: [] });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -41,6 +43,67 @@ export default function ModalA() {
       // Step 3
     } catch (error) {
       console.error("Error fetching contacts:", error);
+    }
+  };
+
+  const navigate = useNavigate();
+  const handleCheckboxChange = () => {
+    setOnlyEven(!onlyEven);
+  };
+  const closeModal = () => {
+    console.log("dfd");
+    navigate("/problem-2");
+  };
+  const openModalC = (contact) => {
+    setSelectedContact(contact);
+    setShowModalC(true);
+  };
+
+  const handleSeeMoreClick = async () => {
+    try {
+      setIsLoading(true);
+
+      const nextPage = currentPage + 1;
+      const res = await axios.get(
+        `https://contact.mediusware.com/api/contacts/?page=${nextPage}`
+      );
+
+      const newResults = res.data.results;
+
+      setQuote((prevQuote) => ({
+        results: [...prevQuote.results, ...newResults],
+      }));
+
+      setCurrentPage(nextPage);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+      setIsLoading(false);
+    }
+  };
+  const handleSeeMoreUsContactsClick = async () => {
+    try {
+      setIsLoading(true);
+
+      const nextPage = currentPage + 1;
+      const res = await axios.get(
+        `https://contact.mediusware.com/api/contacts/?page=${nextPage}`
+      );
+
+      const newResults = res.data.results;
+
+      setUsContacts((prevUsContacts) => [
+        ...prevUsContacts,
+        ...newResults.filter(
+          (result) => result.country.name === "United States"
+        ),
+      ]);
+
+      setCurrentPage(nextPage);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching US contacts:", error);
+      setIsLoading(false);
     }
   };
 
@@ -97,6 +160,9 @@ export default function ModalA() {
     }
   };
 
+  // Ensure that you are not setting both usContacts and quote at the same time
+  // and check for the quote.results existence before rendering.
+
   return (
     <div>
       <div
@@ -139,7 +205,19 @@ export default function ModalA() {
             >
               Close
             </button>
-
+            {/* Search box */}
+            {(quote || usContacts) && (
+              <div className="form-group mx-auto mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search contacts by phone..."
+                  value={searchInput}
+                  onChange={handleSearchChange}
+                  onKeyUp={handleSearchKeyPress}
+                />
+              </div>
+            )}
             {/* All Contacts Modal A*/}
             {quote && (
               <div>
@@ -165,7 +243,15 @@ export default function ModalA() {
                 </ul>
               </div>
             )}
-
+            {quote?.results.length >= currentPage * itemsPerPage && (
+              <button
+                className="btn btn-lg btn-outline-primary mx-auto d-block"
+                onClick={handleSeeMoreClick}
+                disabled={isLoading || quote.results.length >= 600}
+              >
+                {isLoading ? "Loading..." : "See More"}
+              </button>
+            )}
             {/* US Contacts Modal A */}
 
             {usContacts && (
@@ -191,6 +277,17 @@ export default function ModalA() {
               </div>
             )}
 
+            {usContacts && usContacts.length > 0 && (
+              <button
+                className="btn btn-lg btn-outline-primary mx-auto d-block"
+                onClick={handleSeeMoreUsContactsClick}
+                disabled={isLoading || usContacts.length >= 600}
+              >
+                {isLoading ? "Loading..." : "See More (US Contacts)"}
+              </button>
+            )}
+            {/* Checkbox for filtering even IDs */}
+            {/* Checkbox for filtering even IDs - conditionally rendered */}
             {(quote || usContacts) && (
               <div className="form-check mb-3 mx-auto">
                 <input
@@ -205,9 +302,46 @@ export default function ModalA() {
                 </label>
               </div>
             )}
+            {/* ... (existing JSX code) */}
           </div>
         </div>
       </div>
+
+      {showModalC && (
+        <div
+          className="modal"
+          id="exampleModalC"
+          tabIndex="-1"
+          role="dialog"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+          style={{ display: "block" }}
+        >
+          {selectedContact && (
+            <div className="modal-dialog modal-dialog-centered text-center modal-sm  ">
+              <div className="modal-content">
+                {/* Display contact details as needed */}
+                <h2 className="text-center">Modal C</h2>
+                <div>Contact number: {selectedContact.phone}</div>
+                <div>Country: {selectedContact.country.name}</div>
+                {/* Add more details as needed */}
+
+                {/* Modal C content goes here */}
+                <button
+                  className="btn btn-sm btn-outline-danger mb-3 mx-auto d-block"
+                  data-dismiss="modal"
+                  onClick={() => setShowModalC(false)}
+                >
+                  Close Modal C
+                </button>
+              </div>
+              {/* Display contact details in Modal C */}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default ModalA;
